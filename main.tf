@@ -30,7 +30,7 @@ provider "aws" {
 }
 
 # Generate a new private key only if it doesn't exist
-resource "tls_private_key" "terraform_key" {
+resource "tls_private_key" "key_pair" {
   count     = local.private_key_exists ? 0 : 1
   algorithm = "RSA"
   rsa_bits  = 2048
@@ -48,10 +48,10 @@ data "local_file" "existing_public_key" {
 }
 
 # Create a key pair in AWS using either the existing or new public key
-resource "aws_key_pair" "terraform_key" {
-  key_name = "terraform-key"
+resource "aws_key_pair" "key_pair" {
+  key_name = "<project_name>" # change this to your project name
   public_key = local.public_key_exists ? data.local_file.existing_public_key[0].content : (
-    length(tls_private_key.terraform_key) > 0 ? tls_private_key.terraform_key[0].public_key_openssh : ""
+    length(tls_private_key.key_pair) > 0 ? tls_private_key.key_pair[0].public_key_openssh : ""
   )
 
   # Prevent recreation when other parts of the config change
@@ -63,7 +63,7 @@ resource "aws_key_pair" "terraform_key" {
 # Output the private key to a local file (only if newly created)
 resource "local_file" "private_key" {
   count           = local.private_key_exists ? 0 : 1
-  content         = tls_private_key.terraform_key[0].private_key_pem
+  content         = tls_private_key.key_pair[0].private_key_pem
   filename        = local.private_key_file
   file_permission = "0400"
 }
@@ -71,7 +71,7 @@ resource "local_file" "private_key" {
 # Save public key to a file as well (only if newly created)
 resource "local_file" "public_key" {
   count           = local.public_key_exists ? 0 : 1
-  content         = tls_private_key.terraform_key[0].public_key_openssh
+  content         = tls_private_key.key_pair[0].public_key_openssh
   filename        = local.public_key_file
   file_permission = "0644"
 }
@@ -83,10 +83,10 @@ output "key_created" {
 
 module "dev" {
   source   = "./dev"
-  key_name = aws_key_pair.terraform_key.key_name
+  key_name = aws_key_pair.key_pair.key_name
 }
 
 module "prod" {
   source   = "./prod"
-  key_name = aws_key_pair.terraform_key.key_name
+  key_name = aws_key_pair.key_pair.key_name
 }
