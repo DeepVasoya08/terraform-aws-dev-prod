@@ -1,0 +1,7 @@
+AWS Linux 2023:
+    Mumbai (ap-south-1) : ami-0af9569868786b23a
+    Sydney (ap-southeast-2) : ami-06a0b33485e9d1cf1
+
+Ubuntu 24.04 LTS:
+    Mumbai (ap-south-1) : ami-0e35ddab05955cf57
+    Sydney (ap-southeast-2) : ami-0f5d1713c9af4fe30
